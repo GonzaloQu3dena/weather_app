@@ -1,13 +1,20 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:weather_app/features/weather/domain/entities/weather_entity.dart';
+import 'package:weather_app/features/weather/domain/repositories/weather_repository.dart';
 import 'package:weather_app/features/weather/infrastructure/datasources/weather_data_source.dart';
 
-class WeatherRepository {
+final weatherRepositoryProvider = Provider<WeatherRepository>((ref) {
+  final weatherDataSource = ref.read(weatherDataSourceProvider);
+  return WeatherRepositoryImpl(weatherDataSource);
+});
+
+class WeatherRepositoryImpl implements WeatherRepository {
   final WeatherDataSource weatherDataSource;
 
-  WeatherRepository({required this.weatherDataSource});
+  WeatherRepositoryImpl(this.weatherDataSource);
 
-  Future<WeatherEntity> getWeather(String cityName) async {
-    final weatherModel = await weatherDataSource.getWeather(cityName);
-    return weatherModel.toEntity();  
+  @override
+  Future<WeatherEntity> fetchWeather(String cityName) async {
+    return await weatherDataSource.fetchWeatherData(cityName);
   }
 }
