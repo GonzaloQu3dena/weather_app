@@ -13,7 +13,8 @@ dependencies:
   jiffy: ^6.3.2
   json_annotation: ^4.9.0
   riverpod: ^2.6.1
-  build_runner: ^2.4.14
+  build_runner: ^2.4.14 
+  flutter_riverpod: ^2.6.1
 
 dev_dependencies:
   flutter_test:
