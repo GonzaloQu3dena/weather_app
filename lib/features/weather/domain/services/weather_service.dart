@@ -1,35 +1,40 @@
-import 'package:weather_app/features/weather/domain/entities/weather_entry.dart';
+import 'package:weather_app/features/weather/domain/valueobjects/city_name.dart';
+import 'package:weather_app/features/weather/domain/entities/weather_entity.dart';
 import 'package:weather_app/features/weather/domain/repositories/weather_repository.dart';
 
-/// Weather Service
-/// 
-/// Service to handle weather-related operations.
-/// 
-/// Properties:
-/// - [repository]: The repository to fetch weather data from.
-/// 
-/// Methods:
-/// - [getWeather]: Fetches weather data for a given city.
-/// 
-/// Author: Gonzalo Quedena
 class WeatherService {
-  /// The repository to fetch weather data from.
   final WeatherRepository repository;
 
-  /// Constructs a [WeatherService] instance.
-  ///
-  /// Parameters:
-  /// - [repository]: The repository to fetch weather data from.
   WeatherService(this.repository);
 
-  /// Fetches weather data for a given city.
-  ///
-  /// Parameters:
-  /// - [cityName]: The name of the city to fetch weather data for.
-  ///
-  /// Returns:
-  /// - A [Future] that resolves to a list of [WeatherEntry] instances.
-  Future<List<WeatherEntry>> getWeatherAsync(String cityName) async {
-    return await repository.fetchWeatherDataAsync(cityName);
+  Future<WeatherEntity> getWeatherForCity(CityName cityName) async {
+    if (!cityName.isValid) {
+      throw Exception('Invalid city name provided.');
+    }
+
+    final weather = await repository.fetchWeather(cityName.value);
+
+    final description = _modifyDescriptionBasedOnTemperature(weather.temperature, weather.description);
+
+    return WeatherEntity(
+      cityName: weather.cityName,
+      temperature: weather.temperature,
+      description: description,
+      windSpeed: weather.windSpeed,
+      humidity: weather.humidity,
+      dateTime: weather.dateTime,
+      iconCode: weather.iconCode,
+    );
+  }
+
+  String _modifyDescriptionBasedOnTemperature(double temperature, String description) {
+    if (temperature < 5) {
+      return '$description (Freezing cold!)';
+    } else if (temperature < 15) {
+      return '$description (It\'s cold)';
+    } else if (temperature > 30) {
+      return '$description (Stay hydrated!)';
+    }
+    return description;
   }
 }
